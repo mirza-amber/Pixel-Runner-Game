@@ -3,13 +3,13 @@ from sys import exit
 
 pygame.init()
 
-game_active = True
+game_active = False
 
 screen = pygame.display.set_mode((1000,500))
 pygame.display.set_caption('First Game')
 clock = pygame.time.Clock()
-test_font = pygame.font.Font('font\\Pixeltype.ttf' ,50)
-test_font2 = pygame.font.Font('font\\Pixeltype.ttf' ,100)
+
+test_font = pygame.font.Font('font\\Pixeltype.ttf' ,100)
 
 sky_surface = pygame.image.load('graphics\\Sky.jpg').convert()
 sky_rect = sky_surface.get_rect(topleft=(0,0))
@@ -19,12 +19,15 @@ snail_1 = pygame.image.load('graphics\\snail\\snail1.png').convert_alpha()
 snail_rect = snail_1.get_rect(bottomleft=(1100, 390))
 
 player_surface = pygame.image.load('graphics\\Player\\player_stand.png').convert_alpha()
-# player_rect = player_surface.get_rect(bottom =(390), left=(50))                                  #This command just creates a rectangle of the size of image it is built in reference to and just placed on the screen as per the positional arguments.
+# player_rect = player_surface.get_rect(bottom =(390), left=(50))                                   #This command just creates a rectangle of the size of image it is built in reference to and just placed on the screen as per the positional arguments.
 player_rect = player_surface.get_rect(bottomleft=(50, 390))                                         #This command just creates a rectangle of the size of image it is built in reference to and just placed on the screen as per the positional arguments.
 player_gravity = 0
+angle_change = 0
+turn_switch = True
 
-text_surf_start = test_font2.render('Play Game', False , 'Black')
-text_surf_start_rect = text_surf_start.get_rect(center=(500,300))
+test_font2 = pygame.font.Font('font\\Pixeltype.ttf' ,60)
+text_surf_start = test_font2.render('Press "Enter" to start Game', False , 'Black')
+text_surf_start_rect = text_surf_start.get_rect(center=(500,400))
 
 actual_score = 0
 score_surface = test_font.render(f'Score : {actual_score} ' , True, 'Black')
@@ -73,12 +76,31 @@ while True:
 
 
     else:
-        screen.blit(sky_surface, (0,-70))
-        screen.blit(ground_surface, (0,390))
+        
+        screen.fill((94,129,162))
+        if turn_switch:
+            angle_change += 1.5
+        else:
+            angle_change -= 1.5
+
+        if angle_change >= 90:
+            turn_switch = False
+        elif angle_change <= -90:
+            turn_switch = True
+
+
+        player_stand = pygame.transform.rotozoom(pygame.image.load('graphics\\Player\\player_stand.png').convert_alpha(), angle_change, 2)
+        player_stand_rect = player_stand.get_rect(center = (500,250))
+        screen.blit(player_stand, player_stand_rect)
+
+        game_name = test_font.render('PiXel Runner', True, 'Black')
+        game_name_rect = game_name.get_rect(center = (500,100))
+        screen.blit(game_name, game_name_rect)
+
         screen.blit(text_surf_start, text_surf_start_rect)
-        pygame.draw.rect(screen, '#8694BA', score_rect, 0 , 3)
-        pygame.draw.rect(screen, '#8694BA', score_rect, 10, 3)
-        screen.blit(score_surface, score_rect)
+        # pygame.draw.rect(screen, '#8694BA', score_rect, 0 , 3)
+        # pygame.draw.rect(screen, '#8694BA', score_rect, 10, 3)
+        # screen.blit(score_surface, score_rect)
 
         if event.type == pygame.KEYDOWN and pygame.K_KP_ENTER:
             actual_score = 0
@@ -87,10 +109,6 @@ while True:
             score_surface = test_font.render(f'Score : {actual_score} ' , True, 'Black')
             game_active = True
 
-    # if player_rect.colliderect(snail_rect): screen.blit(text_surf_lost, (450, 225))
-    # mousepos = pygame.mouse.get_pos()
-    # if player_rect.collidepoint((mousepos)) : print('collision')
-    
     pygame.display.update()
     clock.tick(60)                                                                              #limit the frames per second (60 per sec in this case)
     
